@@ -1,0 +1,26 @@
+.manager-dashboard {
+  display: flex;
+}
+
+.user-list {
+  width: 200px;
+  border-right: 1px solid #ccc;
+  padding-right: 10px;
+}
+
+.user-list ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.user-list li {
+  cursor: pointer;
+}
+
+.user-list li:hover {
+  text-decoration: underline;
+}
+
+.messages {
+  padding-left: 20px;
+}

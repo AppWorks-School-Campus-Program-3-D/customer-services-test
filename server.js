@@ -32,21 +32,33 @@ app.get('/api/check_connection', (req, res) => {
   }
 });
 
-
 const server = app.listen(4000, () => {
   console.log('Server listening on port 4000');
 });
 
 server.on('upgrade', (request, socket, head) => {
-  if (wss.clients.size < maxClients) {
+  const isManager = request.url === '/manager';
+  
+  // Calculate the number of non-manager clients
+  let nonManagerClients = 0;
+  wss.clients.forEach(client => {
+    if (!managerSockets.has(client)) {
+      nonManagerClients++;
+    }
+  });
+
+  if (isManager) {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit('connection', ws, request);
+    });
+  } else if (nonManagerClients < maxClients) {
     wss.handleUpgrade(request, socket, head, (ws) => {
       wss.emit('connection', ws, request);
     });
   } else if (queuedClients.length < maxQueue) {
     queuedClients.push({ request, socket, head });
   } else {
-    ws.send(JSON.stringify({ type: 'error', content: 'sorry, reaching max client number' }));
-    ws.close();
+    socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
     socket.destroy();
   }
 });
