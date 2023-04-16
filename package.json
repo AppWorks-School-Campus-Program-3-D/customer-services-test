@@ -1,0 +1,18 @@
+{
+  "name": "customer-services-test",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:AppWorks-School-Campus-Program-3-D/customer-services-test.git",
+  "author": "李芸芳 <b08502041@csie.ntu.edu.tw>",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "multer": "^1.4.5-lts.1",
+    "uuid": "^9.0.0",
+    "ws": "^8.13.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.22"
+  }
+}
