@@ -71,36 +71,40 @@ const ManagerDashboard = () => {
           ))}
         </ul>
       </div>
-      <div className="messages">
-        <h3>Messages</h3>
-        {selectedUser ? (
-          <div>
-            <h4>{selectedUser}:</h4>
-            <ul>
-              {messages[selectedUser].map((msg, index) => (
-                <li
-                  key={index}
-                  className={`message ${
-                    msg.sender === "Manager" ? "manager-message" : "client-message"
-                  }`}
-                >
-                  {msg.content}
-                </li>
-              ))}
-            </ul>
-            <form className="reply-form" onSubmit={handleReply}>
-              <label htmlFor="reply">Reply:</label>
-              <input
-                type="text"
-                id="reply"
-                value={reply}
-                onChange={handleReplyChange}
-              />
-              <button type="submit">Send</button>
-            </form>
-          </div>
-        ) : (
-          <p>Select a user to see their messages and reply</p>
+      <div className="message-section">
+        <div className="messages">
+          <h3>Messages</h3>
+          {selectedUser ? (
+            <div className="message-container">
+              <h4>{selectedUser}:</h4>
+              <ul>
+                {messages[selectedUser].map((msg, index) => (
+                  <li
+                    key={index}
+                    className={`message ${
+                      msg.sender === 'Manager' ? 'manager-message' : 'client-message'
+                    }`}
+                  >
+                    {msg.content}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p>Select a user to see their messages and reply</p>
+          )}
+        </div>
+        {selectedUser && (
+          <form className="reply-form" onSubmit={handleReply}>
+            <label htmlFor="reply">Reply:</label>
+            <input
+              type="text"
+              id="reply"
+              value={reply}
+              onChange={handleReplyChange}
+            />
+            <button type="submit">Send</button>
+          </form>
         )}
       </div>
     </div>

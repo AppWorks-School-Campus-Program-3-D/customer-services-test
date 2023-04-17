@@ -120,7 +120,7 @@ const Client = () => {
                       key={index}
                       className={msg.sender === userName ? 'sent' : 'received'}
                     >
-                      <strong>{msg.sender}:</strong> {msg.content}
+                      {msg.content}
                     </li>
                   ))}
                 </ul>
