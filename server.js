@@ -67,25 +67,38 @@ wss.on('connection', (ws, req) => {
   if (req.url === '/manager') {
     console.log('Manager connected');
     managerSockets.add(ws);
-    ws.on('close', () => {
-      managerSockets.delete(ws);
-    });
-    return;
+  } else {
+    console.log('Client connected');
   }
 
-  console.log('Client connected');
-
   ws.on('message', (message) => {
-    console.log(message);
-    const messageStr = JSON.parse(message.toString('utf8'));
-    console.log(messageStr);
-    console.log(`Message sender: ${messageStr.sender}, Message content: ${messageStr.content}`);
+    const messageObj = JSON.parse(message.toString('utf8'));
+    console.log(`Message sender: ${messageObj.sender}, Message content: ${messageObj.content}`);
 
-    // Store the message with a sender (for simplicity, we use a generic sender name)
-    const newMessage = { sender: messageStr.sender, content: messageStr.content };
+    if (messageObj.type === 'managerReply') {
+      const targetClient = [...wss.clients].find(
+        (client) => client !== ws && client.userName === messageObj.receiver
+      );
+    
+      if (targetClient) {
+        const replyMessage = { type: 'reply', sender: 'Manager', content: messageObj.content };
+        console.log(`Message sender: ${replyMessage.sender}, Message content: ${replyMessage.content}`);
+        targetClient.send(JSON.stringify(replyMessage));
+      }
+    
+      return;
+    }
+    
+    if (req.url === '/manager') {
+      return;
+    }
+
+    if (messageObj.sender) {
+      ws.userName = messageObj.sender;
+    }
+    const newMessage = { sender: messageObj.sender, content: messageObj.content };
     messages.push(newMessage);
 
-    // Send the message to manager WebSocket connections only
     managerSockets.forEach((managerSocket) => {
       if (managerSocket.readyState === WebSocket.OPEN) {
         managerSocket.send(JSON.stringify(newMessage));
