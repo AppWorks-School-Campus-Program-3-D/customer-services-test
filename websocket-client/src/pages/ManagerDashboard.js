@@ -78,12 +78,17 @@ const ManagerDashboard = () => {
             <h4>{selectedUser}:</h4>
             <ul>
               {messages[selectedUser].map((msg, index) => (
-                <li key={index}>
-                  <strong>{msg.sender}:</strong> {msg.content}
+                <li
+                  key={index}
+                  className={`message ${
+                    msg.sender === "Manager" ? "manager-message" : "client-message"
+                  }`}
+                >
+                  {msg.content}
                 </li>
               ))}
             </ul>
-            <form onSubmit={handleReply}>
+            <form className="reply-form" onSubmit={handleReply}>
               <label htmlFor="reply">Reply:</label>
               <input
                 type="text"

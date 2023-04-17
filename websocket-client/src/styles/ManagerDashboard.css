@@ -1,26 +1,62 @@
 .manager-dashboard {
   display: flex;
+  font-family: Arial, sans-serif;
 }
 
 .user-list {
-  width: 200px;
+  flex: 1;
   border-right: 1px solid #ccc;
-  padding-right: 10px;
+  padding: 10px;
 }
 
 .user-list ul {
-  list-style-type: none;
+  list-style: none;
   padding: 0;
 }
 
 .user-list li {
   cursor: pointer;
+  padding: 5px;
+  border: 1px solid #ccc;
+  margin-bottom: 5px;
 }
 
 .user-list li:hover {
-  text-decoration: underline;
+  background-color: #eee;
 }
 
 .messages {
-  padding-left: 20px;
+  flex: 2;
+  padding: 10px;
+}
+
+.message {
+  padding: 5px;
+  border-radius: 15px;
+  max-width: 70%;
+  margin-bottom: 5px;
+  display: inline-block;
+}
+
+.client-message {
+  background-color: #e1f3fb;
+  float: left;
+  clear: both;
+}
+
+.manager-message {
+  background-color: #d9f2d9;
+  float: right;
+  clear: both;
+}
+
+.reply-form {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background-color: #f5f5f5;
+  padding: 10px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 }
