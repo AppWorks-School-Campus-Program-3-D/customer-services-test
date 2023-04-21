@@ -181,13 +181,15 @@ button {
 }
 
 .sent {
-  background-color: #caf8fd;
+  background-color: #A6D5D6;
   float: right;
   clear: both;
+  padding: 5px 10px;
 }
 
 .received {
-  background-color: #f1f1f1;
+  background-color: #AAD6AC;
   float: left;
   clear: both;
+  padding: 5px 10px;
 }
