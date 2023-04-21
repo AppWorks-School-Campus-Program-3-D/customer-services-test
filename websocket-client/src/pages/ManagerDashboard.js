@@ -101,49 +101,46 @@ const ManagerDashboard = () => {
       </div>
       <div className='message-section'>
         <div className='messages'>
-          <h3>Messages</h3>
-          {selectedUser ? (
-            <div className='message-container'>
-              <h4>{selectedUser}:</h4>
-              <ul>
-                {messages[selectedUser].map((msg, index) => (
-                  <li
-                    key={index}
-                    className={`message ${
-                      msg.sender === 'Manager'
-                        ? 'manager-message'
-                        : 'client-message'
-                    }`}
-                  >
-                    {msg.content ? (
-                      msg.content
-                    ) : (
-                      <a
-                        href={`${msg.imageURL}`} // Updated this line
-                        target='_blank'
-                        rel='noopener noreferrer'
-                      >
-                        &#128279; Click to download
-                      </a>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            <p>Select a user to see their messages and reply</p>
-          )}
+            <h3>Messages</h3>
+            {selectedUser ? (
+              <div className='dashboard-message-container'>
+                <ul>
+                  {messages[selectedUser].map((msg, index) => (
+                    <li
+                      key={index}
+                      className={`message ${
+                        msg.sender === 'Manager'
+                          ? 'manager-message'
+                          : 'client-message'
+                      }`}
+                    >
+                      {msg.content ? (
+                        msg.content
+                      ) : (
+                        <a
+                          href={`${msg.imageURL}`} // Updated this line
+                          target='_blank'
+                          rel='noopener noreferrer'
+                        >
+                          &#128279; Click to download
+                        </a>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p>Select a user to see their messages and reply</p>
+            )}
         </div>
         {selectedUser && (
           <form className='reply-form' onSubmit={handleReply}>
-            <label htmlFor='reply'>Reply:</label>
             <input
               type='text'
               id='reply'
               value={reply}
               onChange={handleReplyChange}
             />
-            <label htmlFor='image'>Image:</label>
             <input
               type='file'
               id='image'
@@ -152,10 +149,12 @@ const ManagerDashboard = () => {
               style={{ display: 'none' }}
             />
             <button type='button' onClick={() => fileInputRef.current.click()}>
-              Choose Image
+              <img src='/clip.png' alt="file" className='clip-img'/>
             </button>
             {imageFile && <span>{imageFile.name}</span>}
-            <button type='submit'>Send</button>
+            <button type='submit'>
+              <img src="/send.png" alt="send" className='send-img'/>
+            </button>
           </form>
         )}
       </div>
