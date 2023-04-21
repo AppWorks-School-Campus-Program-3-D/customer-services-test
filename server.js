@@ -1,127 +1,177 @@
-const fs = require('fs');
-const path = require('path');
-const express = require('express');
-const multer = require('multer');
-const WebSocket = require('ws');
-const cors = require('cors');
+const fs = require('fs')
+const path = require('path')
+const express = require('express')
+const WebSocket = require('ws')
+const cors = require('cors')
+const multer = require('multer')
+const multerS3 = require('multer-s3');
+const {S3Client} = require('@aws-sdk/client-s3');
 
-const app = express();
-app.use(cors());
-const upload = multer({ dest: 'uploads/' });
+const app = express()
+app.use(cors())
 
-const wss = new WebSocket.Server({ noServer: true });
-const maxClients = 3;
-const maxQueue = 2;
-let queuedClients = [];
-let nonManagerClientsCount = 0;
+require('dotenv').config();
 
-const messages = []; // Store messages here
-const managerSockets = new Set(); // Store manager WebSocket connections
+const REGION = process.env.AWS_REGION;
+const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
-app.use(express.static('public'));
-
-app.post('/upload', upload.single('file'), (req, res) => {
-  console.log(`File received: ${req.file.originalname}`);
-  res.sendStatus(200);
+const s3 = new S3Client({
+  region: REGION,
+  credentials: {
+    accessKeyId: accessKeyId,
+    secretAccessKey: secretAccessKey,
+  },
 });
+
+const upload = multer({
+  storage: multerS3({
+    s3: s3,
+    bucket: process.env.AWS_S3_BUCKET_NAME,
+    contentType: multerS3.AUTO_CONTENT_TYPE,
+    contentLength: 5000000000000,
+    contentDisposition: 'inline',
+    key: function(req, file, cb) {
+      const date = new Date()
+          .toISOString()
+          .replace(/[-T:\.Z]/g, '')
+          .replace(/\d{3}$/, '');
+      cb(null, `test/${date}-${file.originalname}`);
+    },
+  }),
+});
+
+
+const wss = new WebSocket.Server({ noServer: true })
+const maxClients = 3
+const maxQueue = 2
+let queuedClients = []
+let nonManagerClientsCount = 0
+
+const messages = [] // Store messages here
+const managerSockets = new Set() // Store manager WebSocket connections
+
+app.use(express.static('public'))
+
+const logErrors = (err, req, res, next) => {
+  console.error(err.stack);
+  next(err);
+};
+
+app.post('/upload', logErrors, upload.single('file'), (req, res) => {
+  console.log(`File received: ${req.file.originalname}`);
+  console.log(req.file.location);
+  res.json({ filePath: req.file.location }); // Send the file URL in the response
+});
+
 
 app.get('/api/check_connection', (req, res) => {
   if (wss.clients.size < maxClients) {
-    res.json({ canConnect: true });
+    res.json({ canConnect: true })
   } else {
-    res.json({ canConnect: false });
+    res.json({ canConnect: false })
   }
-});
+})
 
 const server = app.listen(4000, () => {
-  console.log('Server listening on port 4000');
-});
+  console.log('Server listening on port 4000')
+})
 
 server.on('upgrade', (request, socket, head) => {
-  const isManager = request.url === '/manager';
+  const isManager = request.url === '/manager'
 
   if (isManager) {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request);
-    });
+    wss.handleUpgrade(request, socket, head, ws => {
+      wss.emit('connection', ws, request)
+    })
   } else if (nonManagerClientsCount < maxClients) {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-      wss.emit('connection', ws, request);
-    });
+    wss.handleUpgrade(request, socket, head, ws => {
+      wss.emit('connection', ws, request)
+    })
   } else if (queuedClients.length < maxQueue) {
-    queuedClients.push({ request, socket, head });
+    queuedClients.push({ request, socket, head })
   } else {
-    socket.write('HTTP/1.1 403 Forbidden\r\n\r\n');
-    socket.destroy();
+    socket.write('HTTP/1.1 403 Forbidden\r\n\r\n')
+    socket.destroy()
   }
-});
-
-
-
+})
 
 wss.on('connection', (ws, req) => {
   if (req.url === '/manager') {
-    console.log('Manager connected');
-    managerSockets.add(ws);
+    console.log('Manager connected')
+    managerSockets.add(ws)
   } else {
-    console.log('Client connected');
-    nonManagerClientsCount++;
+    console.log('Client connected')
+    nonManagerClientsCount++
   }
 
-  ws.on('message', (message) => {
-    const messageObj = JSON.parse(message.toString('utf8'));
-    console.log(`Message sender: ${messageObj.sender}, Message content: ${messageObj.content}`);
+  ws.on('message', message => {
+    const messageObj = JSON.parse(message.toString('utf8'))
+    console.log(
+      `Message sender: ${messageObj.sender}, Message content: ${messageObj.content}`
+    )
 
     if (messageObj.type === 'managerReply') {
       const targetClient = [...wss.clients].find(
-        (client) => client !== ws && client.userName === messageObj.receiver
-      );
-    
+        client => client !== ws && client.userName === messageObj.receiver
+      )
+
       if (targetClient) {
-        const replyMessage = { type: 'reply', sender: 'Manager', content: messageObj.content };
-        console.log(`Message sender: ${replyMessage.sender}, Message content: ${replyMessage.content}`);
-        targetClient.send(JSON.stringify(replyMessage));
+        const replyMessage = {
+          type: 'reply',
+          sender: 'Manager',
+          content: messageObj.content,
+          imageURL: messageObj.imageURL
+        }
+        console.log(
+          `Message sender: ${replyMessage.sender}, Message content: ${replyMessage.content}`
+        )
+        targetClient.send(JSON.stringify(replyMessage))
       }
-    
-      return;
+
+      return
     }
-    
+
     if (req.url === '/manager') {
-      return;
+      return
     }
 
     if (messageObj.sender) {
-      ws.userName = messageObj.sender;
+      ws.userName = messageObj.sender
     }
-    const newMessage = { sender: messageObj.sender, content: messageObj.content };
-    messages.push(newMessage);
+    const newMessage = {
+      sender: messageObj.sender,
+      content: messageObj.content,
+      imageURL: messageObj.imageURL
+    } // Add imageURL to the message object
+    messages.push(newMessage)
 
-    managerSockets.forEach((managerSocket) => {
+    managerSockets.forEach(managerSocket => {
       if (managerSocket.readyState === WebSocket.OPEN) {
-        managerSocket.send(JSON.stringify(newMessage));
+        managerSocket.send(JSON.stringify(newMessage))
       }
-    });
-  });
+    })
+  })
 
   ws.on('close', () => {
-    console.log('Client disconnected');
+    console.log('Client disconnected')
     if (!managerSockets.has(ws)) {
-      nonManagerClientsCount--;
+      nonManagerClientsCount--
     }
     if (queuedClients.length > 0) {
-      const nextClient = queuedClients.shift();
+      const nextClient = queuedClients.shift()
       wss.handleUpgrade(
         nextClient.request,
         nextClient.socket,
         nextClient.head,
-        (ws) => {
-          wss.emit('connection', ws, nextClient.request);
+        ws => {
+          wss.emit('connection', ws, nextClient.request)
         }
-      );
+      )
     }
-  });
-});
+  })
+})
 
 app.get('/api/messages', (req, res) => {
-  res.json(messages);
-});
+  res.json(messages)
+})

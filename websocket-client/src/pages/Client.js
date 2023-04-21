@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
+import axios from 'axios'
 import '../styles/Client.css'
 
 const Client = () => {
@@ -9,6 +10,8 @@ const Client = () => {
   const [errorMessage, setErrorMessage] = useState(null)
   const [messages, setMessages] = useState([])
   const [showMessages, setShowMessages] = useState(false)
+  const [imageFile, setImageFile] = useState(null)
+  const fileInputRef = useRef()
 
   const handleLogin = e => {
     e.preventDefault()
@@ -27,20 +30,44 @@ const Client = () => {
     setMessage(e.target.value)
   }
 
-  const handleSendMessage = e => {
-    e.preventDefault();
-    if (socket && message) {
+  const handleImageChange = e => {
+    const file = e.target.files[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setImageFile({ data: reader.result, name: file.name })
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleSendMessage = async e => {
+    e.preventDefault()
+    if (socket && (message || imageFile)) {
       const msgToSend = {
         type: 'clientMessage',
         sender: userName,
-        content: message
-      };
-      socket.send(JSON.stringify(msgToSend));
-      setMessage('');
-      setMessages(prevMessages => [...prevMessages, msgToSend]);
+        content: message,
+        imageURL: null
+      }
+
+      if (imageFile) {
+        const formData = new FormData()
+        formData.append('file', new File([imageFile], imageFile.name))
+
+        const { data } = await axios.post(
+          'http://localhost:4000/upload',
+          formData
+        )
+        msgToSend.imageURL = data.filePath
+      }
+
+      socket.send(JSON.stringify(msgToSend))
+      setMessage('')
+      setImageFile(null)
+      setMessages(prevMessages => [...prevMessages, msgToSend])
     }
-  };
-  
+  }
 
   useEffect(() => {
     if (isLoggedIn) {
@@ -120,7 +147,15 @@ const Client = () => {
                       key={index}
                       className={msg.sender === userName ? 'sent' : 'received'}
                     >
-                      {msg.content}
+                      {msg.content ? (
+                        msg.content
+                      ) : (
+                        <img
+                          src={`${msg.imageURL}`}
+                          alt='Uploaded content'
+                          style={{ maxWidth: '100px', maxHeight: '100px' }}
+                        />
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -133,6 +168,21 @@ const Client = () => {
                   value={message}
                   onChange={handleMessageChange}
                 />
+                <label htmlFor='image'>Image:</label>
+                <input
+                  type='file'
+                  id='image'
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  style={{ display: 'none' }}
+                />
+                <button
+                  type='button'
+                  onClick={() => fileInputRef.current.click()}
+                >
+                  Choose Image
+                </button>
+                {imageFile && <span>{imageFile.name}</span>}
                 <button type='submit'>Send</button>
               </form>
               <button onClick={handleLogout}>Logout</button>
