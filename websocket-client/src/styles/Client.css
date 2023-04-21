@@ -1,3 +1,11 @@
+@import url("https://fonts.googleapis.com/css2?family=Roboto&display=swap");
+
+button {
+  border: none;
+  cursor: pointer;
+  background-color: transparent;
+}
+
 .client {
   position: relative;
 }
@@ -13,25 +21,148 @@
   z-index: 1000;
 }
 
+.message-icon img {
+  width: 32px;
+  height: 32px;
+}
+
 .message-box {
   position: fixed;
   right: 20px;
-  bottom: 60px;
+  bottom: 70px;
   width: 300px;
-  background-color: white;
+  background-color: #fdf2e980;
   border: 1px solid #ccc;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 20px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   height: 400px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
+}
+
+.login-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.spacer {
+  flex-grow: 1;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.login-form label {
+  display: block;
+  margin-bottom: 10px;
+  font-family: "Roboto", sans-serif;
+  margin-left: 5px;
+  margin-top: 5px;
+}
+
+.login-form input {
+  width: 87%;
+  padding: 1.2rem;
+  border-radius: 9px;
+  border: none;
+}
+
+.login-form input:focus {
+  outline: none;
+}
+
+.login-button {
+  align-self: center;
+  position: absolute;
+  bottom: 20px;
+}
+
+.login-button {
+  cursor: pointer;
+  border: 0;
+  border-radius: 4px;
+  font-weight: 600;
+  margin: 0 10px;
+  width: 200px;
+  padding: 10px 0;
+  box-shadow: 0 0 20px rgba(104, 85, 224, 0.2);
+  transition: 0.4s;
+  color: #7FB3D5  ;
+  background-color: rgba(255, 255, 255, 1);
+  border: 1px solid #7FB3D5 ;
+}
+
+.login-button:hover {
+  color: white;
+  box-shadow: 0 0 20px #7fb3d599;
+  background-color: #7FB3D5 ;
+}
+
+.message-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+.file-button img, .send-button img {
+  width: 16px;
+  height: 16px;
+}
+
+.message-input {
+  border: 1px #FAD7A0 solid;
+  border-radius: 10px;
+  height: 25px;
+  width: 200px;
+  margin: 10px;
+  padding: 5px 10px;
+}
+
+.message-input:focus {
+  outline: none;
+}
+
+.message-box-top {
+  display: flex;
+  justify-content: space-evenly;
+  height: 30px;
+  align-items: center;
+  border-bottom: 1.5px #B9C1C6 solid;
+  flex-shrink: 0;
+}
+
+.username-display {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  font-family: "Roboto", sans-serif;
+}
+
+.close-button-wrapper {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.close-button {
+  width: 20px;
+  height: 20px;
 }
 
 .client-messages {
+  margin-top: 5px;
   flex-grow: 1;
   overflow-y: auto;
+  padding-right: 5px;
 }
 
 .client-messages ul {
@@ -46,6 +177,7 @@
   padding: 5px;
   margin: 5px 0;
   display: inline-block;
+  margin-right: 5px;
 }
 
 .sent {
@@ -58,10 +190,4 @@
   background-color: #f1f1f1;
   float: left;
   clear: both;
-}
-
-.message-input {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 }

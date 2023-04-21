@@ -119,28 +119,48 @@ const Client = () => {
   return (
     <div className='client'>
       <button className='message-icon' onClick={toggleMessages}>
-        &#x1f4ac;
+        <img src='/chat.png' alt='chat' />
       </button>
       {showMessages && (
         <div className='message-box'>
           {!isLoggedIn ? (
-            <form onSubmit={handleLogin}>
-              <label htmlFor='userName'>User Name:</label>
-              <input
-                type='text'
-                id='userName'
-                value={userName}
-                onChange={e => setUserName(e.target.value)}
-                required
-              />
-              <button type='submit'>Login</button>
-            </form>
+            <div className='login-container'>
+              <form onSubmit={handleLogin} className='login-form'>
+                <label htmlFor='userName'>請輸入您的大名：</label>
+                <input
+                  type='text'
+                  id='userName'
+                  value={userName}
+                  onChange={e => setUserName(e.target.value)}
+                  placeholder='Erin'
+                  className='username-input'
+                  required
+                />
+                <button
+                  type='submit'
+                  className='login-button'
+                >
+                  開始詢問
+                </button>
+              </form>
+            </div>
           ) : errorMessage ? (
             <div>{errorMessage}</div>
           ) : (
             <>
+              <div className='message-box-top'>
+                <div className='username-display'>{userName}</div>
+                <div className='close-button-wrapper'>
+                  <button onClick={handleLogout}>
+                    <img
+                      src='/wrong.png'
+                      alt='close'
+                      className='close-button'
+                    />
+                  </button>
+                </div>
+              </div>
               <div className='client-messages'>
-                <h3>Messages</h3>
                 <ul>
                   {messages.map((msg, index) => (
                     <li
@@ -160,15 +180,15 @@ const Client = () => {
                   ))}
                 </ul>
               </div>
-              <form onSubmit={handleSendMessage}>
-                <label htmlFor='message'>Message:</label>
+              <form onSubmit={handleSendMessage} className='message-container'>
                 <input
                   type='text'
                   id='message'
                   value={message}
                   onChange={handleMessageChange}
+                  placeholder='Say something...'
+                  className='message-input'
                 />
-                <label htmlFor='image'>Image:</label>
                 <input
                   type='file'
                   id='image'
@@ -179,13 +199,14 @@ const Client = () => {
                 <button
                   type='button'
                   onClick={() => fileInputRef.current.click()}
+                  className='file-button'
                 >
-                  Choose Image
+                  <img src='/clip.png' alt='Upload' />
                 </button>
-                {imageFile && <span>{imageFile.name}</span>}
-                <button type='submit'>Send</button>
+                <button type='submit' className='send-button'>
+                  <img src='/send.png' alt='Send' />
+                </button>
               </form>
-              <button onClick={handleLogout}>Logout</button>
             </>
           )}
         </div>
