@@ -58,14 +58,14 @@ const logErrors = (err, req, res, next) => {
   next(err);
 };
 
-app.post('/upload', logErrors, upload.single('file'), (req, res) => {
+app.post('/api/1.0/upload', logErrors, upload.single('file'), (req, res) => {
   console.log(`File received: ${req.file.originalname}`);
   console.log(req.file.location);
   res.json({ filePath: req.file.location }); // Send the file URL in the response
 });
 
 
-app.get('/api/check_connection', (req, res) => {
+app.get('/api/1.0/check_connection', (req, res) => {
   if (wss.clients.size < maxClients) {
     res.json({ canConnect: true })
   } else {
@@ -172,6 +172,6 @@ wss.on('connection', (ws, req) => {
   })
 })
 
-app.get('/api/messages', (req, res) => {
+app.get('/api/1.0/messages', (req, res) => {
   res.json(messages)
 })

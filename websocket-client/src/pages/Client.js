@@ -74,7 +74,7 @@ const Client = () => {
       const checkConnection = async () => {
         try {
           const response = await fetch(
-            'http://localhost:4000/api/check_connection'
+            'http://localhost:4000/api/1.0/check_connection'
           )
           const data = await response.json()
 
